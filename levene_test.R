@@ -44,7 +44,9 @@ colnames(trinity_tped)<-titles
 row.names(trinity_tped)<-trinity_tped$SNP
 
 # initialize multi-core and analyze
-c1<-makeCluster(6)
+c1<-makeCluster(1, type="FORK")
+clusterExport(c1,list("process_levene_a","select_phenotype"))
+clusterEvalQ(c1, library(lawstat))
 system.time(raw_results<-unlist(parApply(c1,trinity_tped[1:10000,row.names(select_phenotype)],1,function(x) process_levene_a(x))))
 head(raw_results)
 
