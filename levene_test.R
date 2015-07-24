@@ -27,6 +27,7 @@ library(reshape2)
 library(data.table)
 library(lawstat)
 library(qvalue)
+library(parallel)
 
 # load, clean, and prepare data 
 trinity_tped <- data.frame(fread('~/Desktop/TRINITY_2232_757577_w_sex.collapsed.tped'))
@@ -42,8 +43,9 @@ titles<-c(first,as.character(samples$V1))
 colnames(trinity_tped)<-titles
 row.names(trinity_tped)<-trinity_tped$SNP
 
-# analyze
-raw_results<-unlist(apply(trinity_tped[1:10,row.names(select_phenotype)],1,function(x) process_levene_a(x)))
+# initialize multi-core and analyze
+c1<-makeCluster(6)
+system.time(raw_results<-unlist(parApply(c1,trinity_tped[1:10,row.names(select_phenotype)],1,function(x) process_levene_a(x))))
 head(raw_results)
 
 # pull out p values, display, and save
