@@ -45,7 +45,7 @@ row.names(trinity_tped)<-trinity_tped$SNP
 
 # initialize multi-core and analyze
 c1<-makeCluster(6)
-system.time(raw_results<-unlist(parApply(c1,trinity_tped[1:10,row.names(select_phenotype)],1,function(x) process_levene_a(x))))
+system.time(raw_results<-unlist(parApply(c1,trinity_tped[1:10000,row.names(select_phenotype)],1,function(x) process_levene_a(x))))
 head(raw_results)
 
 # pull out p values, display, and save
