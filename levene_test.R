@@ -14,7 +14,7 @@ process_levene_a <- function(x){
   data <- data[!is.na(data)]
   temp <- merge(select_phenotype,data.frame(data),by="row.names")
   if(length(table(temp[,ncol(temp)]))>1 & all(table(temp[,ncol(temp)])>50)){
-    stats <- tidy(levene.test(temp$MMA,temp[,ncol(temp)]))
+    stats <- tidy(levene.test(temp[,metabolite],temp[,ncol(temp)]))
     return(stats)
   } else{
   return()
@@ -29,10 +29,11 @@ library(lawstat)
 library(qvalue)
 
 # load, clean, and prepare data 
-trinity_tped <- data.frame(fread('~/Desktop/TRINITY_2232_757577_w_sex.collapsed.tped'))
-pheno<-read.csv("~/Desktop/TSS_GWAS_Nov10.csv",header=T)
+setwd('/data/mcgaugheyd/projects/brody/trinity_variance/')
+trinity_tped <- data.frame(fread('TRINITY_2232_757577_w_sex.collapsed.tped'))
+pheno<-read.csv("TSS_GWAS_Nov10.csv",header=T)
 row.names(pheno)<-pheno$UniqueID
-samples<-read.table("~/Desktop/TRINITY_2232_757577_w_sex.tfam")
+samples<-read.table("TRINITY_2232_757577_w_sex.tfam")
 pheno<-pheno[intersect(row.names(pheno),samples$V1),]
 select_phenotype<-pheno[,c("UniqueID",metabolite)]
 select_phenotype[,2] <- as.numeric(as.character(select_phenotype[,2]))
@@ -43,15 +44,15 @@ colnames(trinity_tped)<-titles
 row.names(trinity_tped)<-trinity_tped$SNP
 
 # analyze
-raw_results<-unlist(apply(trinity_tped[1:10,row.names(select_phenotype)],1,function(x) process_levene_a(x)))
+raw_results<-unlist(apply(trinity_tped[,row.names(select_phenotype)],1,function(x) process_levene_a(x)))
 head(raw_results)
 
 # pull out p values, display, and save
 pvals <- raw_results[grep("value",names(raw_results))]
 head(pvals)
 print(summary(pvals))
-print(qsummary(qvalue(pvals)))
-name0<-paste(metabolite,"_pvals.Rdata")
+print(summary(qvalue(pvals)))
+name0<-paste(metabolite,"_pvals.Rdata",sep="")
 save(pvals,file=name0)
 
 # ggplot the top 9 hits by raw value
@@ -61,7 +62,7 @@ hits<-(melt(hits,id.vars=c("Row.names","UniqueID",metabolite)))
 hits<-subset(hits,value!='00')
 name1<-paste(metabolite,"_raw.pdf",sep="")
 pdf(name1)
-print(ggplot(hits,aes(x=value,y=as.numeric(MMA))) + facet_wrap(~variable,scale="free") + geom_violin() + geom_boxplot(width=0.1))
+print(ggplot(hits,aes(x=value,y=as.numeric(hits[,metabolite]))) + facet_wrap(~variable,scale="free") + geom_violin() + geom_boxplot(width=0.1))
 dev.off()
 
 # ggplot the top 9 hits by abs(distance) from median
@@ -79,4 +80,5 @@ name2<-paste(metabolite,"_distance.pdf",sep="")
 pdf(name2)
 print(ggplot(med_dist,aes(x=abs(value),colour=L2)) + geom_density() + theme_bw() + facet_wrap(~L1))
 dev.off()
+
 
