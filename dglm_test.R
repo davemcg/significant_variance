@@ -24,7 +24,7 @@ bc_lambda <- boxcoxfit(cov_met_geno[,met][complete.cases(cov_met_geno[,met])])$l
 
 
 snps <- names(cov_met_geno[grepl("RS",names(cov_met_geno))])
-snps <- snps[1:100]
+#snps <- snps[88530:88550]
 
 cov <- c("Ht","Wt","Sex","Sibcode")
 
