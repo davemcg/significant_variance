@@ -31,7 +31,7 @@ cov <- c("Ht","Wt","Sex","Sibcode")
 
 run_dglm <- function(geno) {
 
-  if (length(table(geno) > 0)) {  
+  if (length(table(geno) > 0) & all(data.frame(table(geno))$Freq>1)) {  
 
     fitting_data <- cbind(cov_met_geno[,met],geno,cov_met_geno[,cov])
     fitting_data <- fitting_data[complete.cases(fitting_data),]
