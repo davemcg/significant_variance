@@ -24,26 +24,27 @@ bc_lambda <- boxcoxfit(cov_met_geno[,met][complete.cases(cov_met_geno[,met])])$l
 
 
 snps <- names(cov_met_geno[grepl("RS",names(cov_met_geno))])
-# snps <- snps[1:1000]
+snps <- snps[1:100]
 
 cov <- c("Ht","Wt","Sex","Sibcode")
 
 
 run_dglm <- function(geno) {
 
-  fitting_data <- cbind(cov_met_geno[,met],geno,cov_met_geno[,cov])
-  fitting_data <- fitting_data[complete.cases(fitting_data),]
-  fitting_data <<- fitting_data # dglm needs this object to be global
-  d.fit <- dglm( formula =
+  if (length(table(geno) > 0)) {  
+
+    fitting_data <- cbind(cov_met_geno[,met],geno,cov_met_geno[,cov])
+    fitting_data <- fitting_data[complete.cases(fitting_data),]
+    fitting_data <<- fitting_data # dglm needs this object to be global
+    d.fit <- dglm( formula =
                  bcPower(fitting_data[,1], bc_lambda ) ~ fitting_data[,2] +
                       (fitting_data[,"Ht"] +
                       fitting_data[,"Wt"] +
                       fitting_data[,"Sex"] +
                       fitting_data[,"Sibcode"]),
                       dformula = ~ fitting_data[,2] )
-   return(dglm.Pvalues(d.fit))
-   #  dglm_meanPvalues[snp] <- dglm.Pvalues(d.fit)[1]
-   #  dglm_dispPvalues[snp] <- dglm.Pvalues(d.fit)[2]
+    return(dglm.Pvalues(d.fit))
+	}
 }
 
 
