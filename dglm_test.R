@@ -9,6 +9,7 @@ met <- args[1]
 library(car)
 library(dglm)  
 library(geoR)
+library(parallel)
 
 # from Ronnegard and Valdar, Genetics 2011
 dglm.Pvalues <- function(dglm.fit){
@@ -35,6 +36,7 @@ run_dglm <- function(geno) {
 
     fitting_data <- cbind(cov_met_geno[,met],geno,cov_met_geno[,cov])
     fitting_data <- fitting_data[complete.cases(fitting_data),]
+ 	fitting_data <- as.matrix(fitting_data)
     fitting_data <<- fitting_data # dglm needs this object to be global
     d.fit <- dglm( formula =
                  bcPower(fitting_data[,1], bc_lambda ) ~ fitting_data[,2] +
@@ -47,8 +49,9 @@ run_dglm <- function(geno) {
 	}
 }
 
-
-pvalues <- unlist(apply(cov_met_geno[,snps],2, function(x) run_dglm(x)))
+cl <- makeCluster(4, type="FORK")
+pvalues <- unlist(clusterApply(cl,cov_met_geno[,snps], function(x) run_dglm(x)))
+#pvalues <- unlist(apply(cov_met_geno[,snps],2, function(x) run_dglm(x)))
 
 
 
