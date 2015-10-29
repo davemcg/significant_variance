@@ -25,12 +25,12 @@ bc_lambda <- boxcoxfit(cov_met_geno[,met][complete.cases(cov_met_geno[,met])])$l
 
 
 snps <- names(cov_met_geno[grepl("RS",names(cov_met_geno))])
-#snps <- snps[88530:88550]
+snps <- snps[1:1000]
 
 cov <- c("Ht","Wt","Sex","Sibcode")
 
 
-run_dglm <- function(geno) {
+run_dglm <- function(geno, the_snp) {
 
   if (length(table(geno) > 0) & all(data.frame(table(geno))$Freq>1)) {  
 
@@ -45,15 +45,19 @@ run_dglm <- function(geno) {
                       fitting_data[,"Sex"] +
                       fitting_data[,"Sibcode"]),
                       dformula = ~ fitting_data[,2] )
-    return(dglm.Pvalues(d.fit))
+    
+	output <- dglm.Pvalues(d.fit)
+	old_names <- names(output)
+	new_name1 <- paste(the_snp,	old_names[1],sep="_")
+	new_name2 <- paste(the_snp, old_names[2],sep="_")
+	names(output) <- c(new_name1,new_name2)
+	return(output)
 	}
 }
 
 cl <- makeCluster(4, type="FORK")
-pvalues <- unlist(clusterApply(cl,cov_met_geno[,snps], function(x) run_dglm(x)))
+pvalues <- unlist(clusterApply(cl,cov_met_geno[,snps], function(x) run_dglm(x,snps)))
 #pvalues <- unlist(apply(cov_met_geno[,snps],2, function(x) run_dglm(x)))
-
-
 
 
 
