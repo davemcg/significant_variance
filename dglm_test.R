@@ -48,9 +48,10 @@ run_dglm <- function(geno, the_snp) {
     
 	output <- dglm.Pvalues(d.fit)
 	old_names <- names(output)
-	new_name1 <- paste(the_snp,	old_names[1],sep="_")
-	new_name2 <- paste(the_snp, old_names[2],sep="_")
-	names(output) <- c(new_name1,new_name2)
+
+	new_name <- sapply(old_names, function(x) paste(the_snp,x,sep="_"))
+
+	names(output) <- new_name
 	return(output)
 	}
 }
