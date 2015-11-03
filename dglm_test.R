@@ -30,7 +30,10 @@ snps <- snps[1:1000]
 cov <- c("Ht","Wt","Sex","Sibcode")
 
 
-run_dglm <- function(geno, the_snp) {
+run_dglm <- function(snp) {
+
+
+  geno <- cov_met_geno[,snp]
 
   if (length(table(geno) > 0) & all(data.frame(table(geno))$Freq>1)) {  
 
@@ -47,9 +50,10 @@ run_dglm <- function(geno, the_snp) {
                       dformula = ~ fitting_data[,2] )
     
 	output <- dglm.Pvalues(d.fit)
+	
 	old_names <- names(output)
 
-	new_name <- sapply(old_names, function(x) paste(the_snp,x,sep="_"))
+	new_name <- sapply(old_names, function(x) paste(snp,x,sep="_"))
 
 	names(output) <- new_name
 	return(output)
@@ -57,7 +61,7 @@ run_dglm <- function(geno, the_snp) {
 }
 
 cl <- makeCluster(4, type="FORK")
-pvalues <- unlist(clusterApply(cl,cov_met_geno[,snps], function(x) run_dglm(x,snps)))
+pvalues <- unlist(clusterApply(cl,snps, function(x) run_dglm(x)))
 #pvalues <- unlist(apply(cov_met_geno[,snps],2, function(x) run_dglm(x)))
 
 
