@@ -24,7 +24,8 @@ load("cov_AllMetablites_AllGenotypes012_TSS.Rdata")
 bc_lambda <- boxcoxfit(cov_met_geno[,met][complete.cases(cov_met_geno[,met])])$lambda
 
 
-snps <- names(cov_met_geno[grepl("RS",names(cov_met_geno))])
+#snps <- names(cov_met_geno[grepl("RS",names(cov_met_geno))])
+snps <- grep("RS",names(cov_met_geno))
 snps <- snps[1:1000]
 
 cov <- c("Ht","Wt","Sex","Sibcode")
@@ -61,7 +62,7 @@ run_dglm <- function(snp) {
 }
 
 cl <- makeCluster(4, type="FORK")
-pvalues <- unlist(clusterApply(cl,snps, function(x) run_dglm(x)))
+pvalues <- unlist(clusterApply(cl,seq(snps[1]:snps[length(snps)]), function(x) run_dglm(x)))
 #pvalues <- unlist(apply(cov_met_geno[,snps],2, function(x) run_dglm(x)))
 
 
